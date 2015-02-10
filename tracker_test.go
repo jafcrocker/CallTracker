@@ -1,9 +1,7 @@
 package tracker
 
 import (
-    "fmt"
     "testing"
-    "time"
 )
 
 func TestXXX(t *testing.T) {
@@ -12,11 +10,8 @@ func TestXXX(t *testing.T) {
 
     tracker := c.NewTracker()
 
-    tracker.startTracking(time.Now())
+    finalizeReporter := tracker.startTracking()
     tracker.captureTrace()
-
-    fmt.Printf("%+v\n", tracker)
-
 
     var f = func () () {
         tracker.captureTrace()
@@ -26,6 +21,6 @@ func TestXXX(t *testing.T) {
         f()
     }
 
-    tracker.writeReport(time.Now())
+    close(finalizeReporter)
 
 }
