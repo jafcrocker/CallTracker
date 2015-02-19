@@ -61,15 +61,18 @@ func (t *StackTracker) TrackCall(now time.Time) {
 	atomic.AddInt32(&t.count, 1)
 
 	if t.isTracking() {
-		t.lastCaptureMutex.Lock()
 		doCapture := now.Sub(t.lastCapture) > t.config.captureInterval
 		if doCapture {
-			t.lastCapture = now
-		}
-		t.lastCaptureMutex.Unlock()
+			t.lastCaptureMutex.Lock()
+			doCapture := now.Sub(t.lastCapture) > t.config.captureInterval
+			if doCapture {
+				t.lastCapture = now
+			}
+			t.lastCaptureMutex.Unlock()
 
-		if doCapture {
-			t.captureTrace()
+			if doCapture {
+				t.captureTrace()
+			}
 		}
 	}
 }
