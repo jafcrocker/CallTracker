@@ -58,12 +58,7 @@ type StackTracker struct {
 }
 
 func (t *StackTracker) TrackCall(now time.Time) {
-	for {
-		count := atomic.LoadInt32(&t.count)
-		if atomic.AddInt32(&t.count, 1) == count+1 {
-			break
-		}
-	}
+	atomic.AddInt32(&t.count, 1)
 
 	if t.isTracking() {
 		t.lastCaptureMutex.Lock()
