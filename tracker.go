@@ -51,6 +51,7 @@ type StackTracker struct {
 
 	count  int32
 
+	tracking uint32
 	tracesMutex  sync.RWMutex
 	traceChannel chan string
 
@@ -121,9 +122,7 @@ func (t *StackTracker) intervalTester() {
 }
 
 func (t *StackTracker) isTracking() bool {
-	t.tracesMutex.RLock()
-	defer t.tracesMutex.RUnlock()
-	return t.traceChannel != nil
+	return atomic.LoadUint32(&t.tracking) != 0
 }
 
 func (t *StackTracker) startTracking() chan interface{} {
@@ -132,6 +131,7 @@ func (t *StackTracker) startTracking() chan interface{} {
 	go reportWriter(t.config, traceChannel, finalizeReporter)
 	t.tracesMutex.Lock()
 	t.traceChannel = traceChannel
+	atomic.StoreUint32(&t.tracking, 1)
 	t.tracesMutex.Unlock()
 	return finalizeReporter
 }
@@ -139,6 +139,7 @@ func (t *StackTracker) startTracking() chan interface{} {
 func (t *StackTracker) stopTracking(finalizeReporter chan interface{}) {
 	t.tracesMutex.Lock()
 	t.traceChannel = nil
+	atomic.StoreUint32(&t.tracking, 0)
 	t.tracesMutex.Unlock()
 	close(finalizeReporter)
 }
