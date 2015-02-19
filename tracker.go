@@ -42,12 +42,13 @@ func (c *Config) NewTracker() *StackTracker {
 	t := &StackTracker{
 		config: c,
 	}
-	//go t.intervalTester()
+	go t.intervalTester()
 	return t
 }
 
 type StackTracker struct {
 	config *Config
+
 	count  int32
 
 	tracesMutex  sync.RWMutex
